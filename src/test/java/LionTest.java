@@ -1,7 +1,9 @@
 import com.example.Feline;
 import com.example.Lion;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -19,29 +21,41 @@ public class LionTest {
     @Mock
     Feline feline;
 
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
+
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void getKittensShouldReturnOne() {
-        lion = new Lion(feline);
-        Mockito.when(lion.getKittens()).thenReturn(1);
+    public void getKittensShouldReturnOne() throws Exception {
+        lion = new Lion("Самка", feline);
+        Mockito.when(feline.getKittens()).thenReturn(1);
         int actualResult = lion.getKittens();
         assertEquals(1, actualResult);
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void doesHaveManeShouldThrowExceptionWhenIncorrectSex() throws Exception {
-        lion = new Lion("Некорректный пол");
+        exceptionRule.expect(Exception.class);
+        lion = new Lion("Некорректный пол", feline);
+        lion.doesHaveMane();
+    }
+
+    @Test
+    public void doesHaveManeExceptionShouldHaveMessage() throws Exception {
+        exceptionRule.expect(Exception.class);
+        exceptionRule.expectMessage("Используйте допустимые значения пола животного - самей или самка");
+        lion = new Lion("Некорректный пол", feline);
         lion.doesHaveMane();
     }
 
     @Test
     public void getFoodShouldReturnFoodList() throws Exception {
-        lion = new Lion(feline);
-        Mockito.when(lion.getFood()).thenReturn(List.of("Животные", "Птицы", "Рыба"));
+        lion = new Lion("Самец", feline);
+        Mockito.when(feline.getFood("Хищник")).thenReturn(List.of("Животные", "Птицы", "Рыба"));
         List<String> actualFood = lion.getFood();
         assertEquals(3, actualFood.size());
     }
